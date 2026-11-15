@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Creavy Calls</title>
+<meta name="description" content="Creavy seller call tracker: no repeat calls, callback reminders and notes.">
+<meta name="theme-color" content="#a8431f" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#18120e" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Creavy Calls">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{
+  --ground:#f7f1e9;--surface:#fffdf9;--ink:#2b1e16;--muted:#6b584a;--line:#e5d9ca;--edge:#8d7a6b;
+  --clay:#b04a27;--on-clay:#fff;--hero:#a8431f;--peach:#ea9469;--haldi:#f0ab12;--on-haldi:#2a1d00;
+  --madder:#b3283f;--neem:#26744f;--amber:#8f5a06;--sea:#0b6f86;--jamun:#74408f;--ocean:#2b59a3;--slate:#6b584a;
+  --focus:#2b59a3;--shadow:rgba(60,30,10,.35);
+}
+@media (prefers-color-scheme:dark){:root{
+  --ground:#18120e;--surface:#241a14;--ink:#f5ece2;--muted:#bfaa97;--line:#3b2d23;--edge:#8a7563;
+  --clay:#ea9469;--on-clay:#2b1a10;--hero:#7c3419;--haldi:#f3b533;
+  --madder:#f08090;--neem:#5cc08f;--amber:#f0b84a;--sea:#52c3dc;--jamun:#c79be0;--ocean:#8fb0ee;--slate:#bfaa97;
+  --focus:#9fc0ff;--shadow:rgba(0,0,0,.6);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif;overscroll-behavior-y:none}
+body.lock{overflow:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3,p,ul,ol{margin:0}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.t-green{--c:var(--neem)}.t-red{--c:var(--madder)}.t-amber{--c:var(--amber)}.t-teal{--c:var(--sea)}.t-violet{--c:var(--jamun)}.t-gray{--c:var(--slate)}.t-blue{--c:var(--ocean)}
+.mt{margin-top:10px}.mt2{margin-top:22px}
+.hint{font-size:14px;color:var(--muted)}
+.row{display:flex;align-items:center;gap:8px}.wrap{flex-wrap:wrap}.sp{flex:1}
+.ic{flex:none}
+
+#app{max-width:640px;margin:0 auto}
+header{position:sticky;top:0;z-index:5;background:var(--ground);padding:calc(env(safe-area-inset-top) + 12px) 16px 10px}
+header h1{font:700 24px/1.1 Georgia,"Noto Serif","Iowan Old Style",serif;color:var(--clay)}
+header p{font-size:14px;color:var(--muted);margin-top:3px;min-height:20px}
+main{padding:4px 16px 170px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:46px;padding:0 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:650;text-align:center;white-space:nowrap}
+.btn.block{white-space:normal}
+.btn.sm{min-height:40px;padding:0 13px;font-size:15px}
+.btn.pri{background:var(--clay);border-color:var(--clay);color:var(--on-clay)}
+.btn.haldi{background:var(--haldi);border-color:var(--haldi);color:var(--on-haldi)}
+.btn.danger{color:var(--madder);border-color:var(--madder);background:transparent}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.45}
+.fab{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom) + 76px);z-index:7;display:flex;align-items:center;gap:8px;min-height:52px;padding:0 20px 0 16px;border-radius:26px;border:0;background:var(--clay);color:var(--on-clay);font-weight:700;box-shadow:0 6px 18px var(--shadow)}
+
+/* bottom nav */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav .in{max-width:640px;margin:0 auto;display:flex}
+nav button{flex:1;position:relative;border:0;background:none;padding:9px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;font-weight:650}
+nav button.on{color:var(--clay)}
+nav button.on::before{content:"";position:absolute;top:0;left:32%;right:32%;height:3px;border-radius:0 0 3px 3px;background:var(--peach)}
+nav .ico{display:flex;height:24px;align-items:center}
+nav em{position:absolute;top:3px;left:calc(50% + 9px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--madder);color:#fff;font:700 11px/18px system-ui,sans-serif;text-align:center}
+
+/* the call-next card: a block-print dot lattice, the one decorative thing */
+.hero{position:relative;overflow:hidden;color:#fff;border-radius:20px;padding:18px 18px 16px;margin:6px 0 6px;
+  background:radial-gradient(circle at 14px 14px,rgba(255,255,255,.2) 2.2px,transparent 2.8px) 0 0/28px 28px,
+             radial-gradient(circle at 50% 50%,rgba(255,255,255,.12) 3.4px,transparent 4px) 14px 14px/28px 28px,
+             var(--hero)}
+.hero .kick{font-size:15px;opacity:.88}
+.hero .big{font:700 28px/1.15 Georgia,"Noto Serif","Iowan Old Style",serif;margin:6px 0 2px;overflow-wrap:anywhere}
+.hero .num{font-size:21px;font-variant-numeric:tabular-nums;letter-spacing:.03em}
+.hero .pl{margin-top:10px}
+.hero .pill{display:inline-block;background:var(--haldi);color:var(--on-haldi);font-weight:700;font-size:14px;padding:2px 11px;border-radius:999px}
+.hero .hn{margin-top:10px;font-size:15px;opacity:.92;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.hero .go{margin-top:16px}
+.hero .more{margin-top:10px;font-size:14px;opacity:.85;text-align:center}
+.how{padding-left:20px;margin-top:16px;color:var(--ink)}.how li{margin:6px 0}
+
+/* contact rows: one grouped list, colour stripe = status */
+.sec{display:flex;align-items:center;gap:8px;font:700 19px/1.2 Georgia,"Noto Serif","Iowan Old Style",serif;margin:22px 2px 8px}
+.sec .count{font:600 13px system-ui,sans-serif;background:var(--line);color:var(--muted);padding:1px 9px;border-radius:999px}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.item{position:relative;padding:12px 14px 12px 19px;border-bottom:1px solid var(--line);cursor:pointer}
+.item:last-child{border-bottom:0}
+.item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--bar,var(--c,var(--line)))}
+.item.t-amber{--bar:var(--haldi)}
+.item .top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.item .nm{font-weight:650;font-size:17px;overflow-wrap:anywhere}
+.item .ph{font-variant-numeric:tabular-nums;color:var(--muted);letter-spacing:.02em}
+.item .sub,.item .meta{font-size:14px;color:var(--muted)}
+.item .cb{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:14px;font-weight:650;color:var(--amber)}
+.item .cb.over{color:var(--madder)}
+.item .cb .ic{width:16px;height:16px}
+.item .note{margin-top:6px;font-size:15px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.item .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.item .acts .btn.sm{padding:0 11px}
+.chip{flex:none;display:inline-flex;align-items:center;font-size:13px;font-weight:650;padding:2px 10px;border-radius:999px;color:var(--c,var(--slate));background:rgba(107,88,74,.14);background:color-mix(in srgb,var(--c,var(--slate)) 14%,transparent)}
+.empty{padding:30px 14px;text-align:center;color:var(--muted)}
+.chiprow{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chiprow::-webkit-scrollbar{display:none}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:14px;margin:12px 0 0;background:var(--surface);border:1px solid var(--line);font-size:15px}
+.banner span{flex:1;min-width:0}
+.banner .btn{flex:none}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.panel h3{font:700 17px/1.2 Georgia,"Noto Serif","Iowan Old Style",serif;margin-bottom:6px}
+.panel p{margin:6px 0}
+.panel .row{margin-top:10px}
+
+/* forms */
+label{display:block;font-size:14px;font-weight:650;color:var(--muted);margin:14px 0 5px}
+input[type=text],input[type=tel],input[type=search],input[type=datetime-local],textarea,select{width:100%;min-height:46px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--edge);background:var(--surface);color:var(--ink)}
+input:focus,textarea:focus,select:focus{border-color:var(--focus);outline:none}
+.row input[type=text]{flex:1;min-width:0;width:auto}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.tag{font-size:13px;line-height:1.35;padding:1px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.tag.cat{color:var(--clay);border-color:var(--clay);border-color:color-mix(in srgb,var(--clay) 50%,var(--line))}
+.item .why{margin-top:2px;font-size:14px}
+textarea{min-height:96px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.alert{padding:10px 12px;border-radius:12px;margin-top:10px;font-size:15px;border:1px solid var(--line);background:var(--surface)}
+.alert.warn{border-color:var(--haldi);background:color-mix(in srgb,var(--haldi) 14%,var(--surface))}
+.alert.bad{border-color:var(--madder);background:color-mix(in srgb,var(--madder) 10%,var(--surface))}
+.alert.ok{border-color:var(--neem);background:color-mix(in srgb,var(--neem) 10%,var(--surface))}
+.seg{display:flex;background:var(--line);border-radius:12px;padding:3px}
+.seg button{flex:1;border:0;background:none;padding:10px;border-radius:9px;font-weight:650;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{display:flex;align-items:center;gap:9px;min-height:56px;padding:8px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);text-align:left;font-weight:650;font-size:15px;line-height:1.2}
+.opt::before{content:"";flex:none;width:11px;height:11px;border-radius:50%;background:var(--bar,var(--c))}
+.opt.t-amber{--bar:var(--haldi)}
+.opt.sel{border-color:var(--bar,var(--c));background:color-mix(in srgb,var(--bar,var(--c)) 14%,var(--surface));box-shadow:inset 0 0 0 1px var(--bar,var(--c))}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.pick{flex:none;white-space:nowrap;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 13px;font-size:15px;font-weight:600;border-radius:999px}
+.pick.sel{background:var(--clay);color:var(--on-clay);border-color:var(--clay)}
+.hist{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+
+/* sheets, dialogs, toast */
+.backdrop{position:fixed;inset:0;z-index:20;background:rgba(30,16,8,.55);display:flex;align-items:flex-end;justify-content:center}
+.backdrop.center{align-items:center;z-index:30}
+.sheet{background:var(--ground);width:100%;max-width:640px;max-height:92vh;max-height:92dvh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;animation:up .18s ease-out}
+.sheet-head{display:flex;align-items:flex-start;gap:8px;padding:16px 16px 6px}
+.sheet-head h2{font:700 21px/1.2 Georgia,"Noto Serif","Iowan Old Style",serif}
+.sheet-head .ph{color:var(--muted);font-size:15px;font-variant-numeric:tabular-nums}
+.sheet-body{overflow:auto;padding:2px 16px 18px;-webkit-overflow-scrolling:touch}
+.sheet-foot{display:flex;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--ground)}
+.sheet-foot .btn{flex:1}
+@keyframes up{from{transform:translateY(24px);opacity:.5}to{transform:none;opacity:1}}
+.dlg{background:var(--surface);color:var(--ink);border-radius:18px;max-width:420px;width:calc(100% - 32px);padding:20px 18px 16px;margin:auto}
+.dlg h3{font:700 20px/1.2 Georgia,"Noto Serif","Iowan Old Style",serif;color:var(--c,var(--ink))}
+.dlg .dm{margin-top:8px}
+.dlg .dm ul{padding-left:18px;margin:6px 0}
+.dlg .dbtns{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 142px);z-index:40;display:flex;align-items:center;gap:14px;max-width:calc(100% - 32px);padding:11px 16px;border-radius:14px;background:#2b1e16;color:#fff;font-size:15px;box-shadow:0 6px 18px var(--shadow)}
+#toast button{border:0;background:none;color:var(--haldi);font-weight:700;padding:4px 0;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header><h1>Creavy Calls</h1><p id="sum"></p></header>
+  <main id="view"></main>
+</div>
+<button id="fab" class="fab" data-act="add"></button>
+<nav aria-label="Main"><div class="in">
+  <button data-act="tab" data-tab="today"><span class="ico"></span><span>Today</span><em hidden></em></button>
+  <button data-act="tab" data-tab="queue"><span class="ico"></span><span>Calling list</span><em hidden></em></button>
+  <button data-act="tab" data-tab="called"><span class="ico"></span><span>Called</span><em hidden></em></button>
+  <button data-act="tab" data-tab="settings"><span class="ico"></span><span>Settings</span><em hidden></em></button>
+</div></nav>
+<div id="layer"></div>
+<div id="dlgRoot"></div>
+<div id="toast" hidden></div>
+<input type="file" id="file" accept=".json,application/json" hidden>
+
+<script>
+'use strict';
+/* ================= LOGIC: pure helpers ================= */
+const MIN=6e4,HOUR=36e5,DAY=864e5;
+
+// What the seller said on a call. "final" = no reminder needed. "dnc" = do not call again.
+// The order here is the order of the buttons in the "What did the seller say?" sheet.
+const OUTCOMES={
+  interested:{label:'Interested',tone:'green'},
+  notint:{label:'Not interested',tone:'red',final:true,dnc:true},
+  callback:{label:'Call back later',tone:'amber',needsTime:true},
+  noanswer:{label:'No answer, busy or off',tone:'gray'},
+  docs:{label:'Will send photos or documents',tone:'blue'},
+  whatsapp:{label:'Send details on WhatsApp',tone:'teal'},
+  lang:{label:'Language problem',tone:'violet'},
+  wrong:{label:'Wrong number',tone:'red',final:true,dnc:true},
+  joined:{label:'Joined Creavy',tone:'green',final:true},
+  other:{label:'Other reply',tone:'gray'}
+};
+const BUILTIN_LABELS=Object.keys(OUTCOMES).map(k=>OUTCOMES[k].label.toLowerCase());
+const isOutcome=k=>Object.prototype.hasOwnProperty.call(OUTCOMES,k);
+const STATUS={
+  new:{label:'Not called yet',tone:'gray'},
+  dialed:{label:'Reply not logged',tone:'amber'}
+};
+const info=st=>STATUS[st]||(isOutcome(st)?OUTCOMES[st]:STATUS.new);
+// Reply options the user adds in Settings. They live in db.settings.custom and are added to OUTCOMES at start.
+const cleanCustom=a=>Array.isArray(a)?a.filter((o,i)=>o&&/^x[a-z0-9]{3,16}$/.test(o.k)&&typeof o.label==='string'&&o.label.trim()&&a.findIndex(p=>p&&p.k===o.k)===i).slice(0,8).map(o=>({k:o.k,label:o.label.trim().slice(0,40)})):[];
+function setCustom(list){
+  Object.keys(OUTCOMES).forEach(k=>{if(OUTCOMES[k].custom)delete OUTCOMES[k];});
+  list.forEach(o=>{OUTCOMES[o.k]={label:o.label,tone:'blue',custom:true};});
+}
+
+function normPhone(raw){
+  let d=String(raw==null?'':raw).replace(/\D/g,'');
+  if(d.length===13&&d.startsWith('091'))d=d.slice(3);
+  else if(d.length===12&&d.startsWith('91'))d=d.slice(2);
+  else if(d.length===11&&d.startsWith('0'))d=d.slice(1);
+  return /^[6-9]\d{9}$/.test(d)?d:null;
+}
+const fmtPhone=p=>p?p.slice(0,5)+' '+p.slice(5):'';
+const startOfDay=ts=>{const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime();};
+const fmtClock=ts=>new Date(ts).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true}).toUpperCase();
+const dayDiff=ts=>Math.round((startOfDay(ts)-startOfDay(Date.now()))/DAY);
+const fmtDay=ts=>new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+function fmtDT(ts){
+  const k=dayDiff(ts),t=fmtClock(ts);
+  if(k===0)return 'Today '+t;
+  if(k===1)return 'Tomorrow '+t;
+  if(k===-1)return 'Yesterday '+t;
+  return fmtDay(ts)+', '+t;
+}
+function fmtWhen(ts){
+  const k=dayDiff(ts),t=fmtClock(ts);
+  if(k===0)return 'today at '+t;
+  if(k===1)return 'tomorrow at '+t;
+  if(k===-1)return 'yesterday at '+t;
+  return 'on '+fmtDay(ts)+' at '+t;
+}
+function toLocalInput(ts){
+  const d=new Date(ts),p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+}
+function presets(now=Date.now()){
+  const at=(days,h)=>{const x=new Date(now);x.setDate(x.getDate()+days);x.setHours(h,0,0,0);return x.getTime();};
+  const out=[
+    {k:'10m',label:'In 10 min',ts:now+10*MIN},
+    {k:'1h',label:'In 1 hour',ts:now+HOUR},
+    {k:'3h',label:'In 3 hours',ts:now+3*HOUR}
+  ];
+  if(at(0,17)-now>45*MIN)out.push({k:'5pm',label:'Today 5 PM',ts:at(0,17)});
+  out.push(
+    {k:'t10',label:'Tomorrow 10 AM',ts:at(1,10)},
+    {k:'t4',label:'Tomorrow 4 PM',ts:at(1,16)},
+    {k:'2d',label:'In 2 days',ts:at(2,10)},
+    {k:'1w',label:'Next week',ts:at(7,10)}
+  );
+  return out;
+}
+// new (never dialed) | dialed (called, result not logged) | an OUTCOMES key
+function statusOf(c){
+  if(!c.calls.length)return 'new';
+  const last=c.calls[c.calls.length-1];
+  return last.outcome||'dialed';
+}
+// Returns null when it is fine to call, otherwise a warning to show first.
+function guard(c,now=Date.now()){
+  const st=statusOf(c);
+  if(st==='new')return null;
+  const last=c.calls[c.calls.length-1],o=OUTCOMES[st],when=fmtWhen(last.at);
+  const n=c.calls.length>1?' You have called '+c.calls.length+' times.':'';
+  if(o&&o.dnc)return{level:'block',title:'Do not call again',msg:'You already spoke to this number '+when+'. Reply: '+o.label+'.'+n};
+  if(o&&o.final)return{level:'warn',title:'Already joined',msg:'This seller already joined Creavy. Last call was '+when+'.'+n};
+  if(c.callbackAt&&c.callbackAt-now>15*MIN)return{level:'warn',title:'Callback is for later',msg:'This seller asked for a call '+fmtWhen(c.callbackAt)+'. Call now anyway?'};
+  if(c.callbackAt)return null;
+  return{level:'warn',title:'Already called',msg:'You called this number '+when+'.'+n+'\n'+(o?'Reply: '+o.label+'.':'Reply not logged yet.')+'\nCall again?'};
+}
+function parseBulk(text){
+  return String(text||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(line=>{
+    const m=line.match(/\+?\d[\d\s().-]{8,}\d/);
+    if(!m)return{raw:line,phone:null,name:''};
+    const phone=normPhone(m[0]);
+    const name=line.replace(m[0],' ').replace(/[,;|\t]+/g,' ').replace(/\s+/g,' ').trim().slice(0,80);
+    return{raw:line,phone,name};
+  });
+}
+const icsEsc=s=>String(s==null?'':s).replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/([,;])/g,'\\$1');
+const icsDT=ts=>new Date(ts).toISOString().replace(/[-:]|\.\d{3}/g,'');
+function callDesc(c){
+  const tg=c.tags||[];
+  return ['Phone: +91 '+fmtPhone(c.phone),c.cbNote?'Talk about: '+c.cbNote:'',c.cat?'Makes: '+c.cat:'',tg.length?'Needs: '+tg.join(', '):'',c.notes?'Notes: '+c.notes.slice(0,300):''].filter(Boolean).join('\n');
+}
+function gcalURL(c){
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Call '+(c.name||fmtPhone(c.phone))+' (Creavy)')+
+    '&dates='+icsDT(c.callbackAt)+'/'+icsDT(c.callbackAt+15*MIN)+'&details='+encodeURIComponent(callDesc(c));
+}
+// Calendar files wrap every line after 75 bytes: the rest continues on the next line, which starts with a space.
+function icsFold(line){
+  const enc=new TextEncoder(),out=[];
+  let cur='',bytes=0;
+  for(const ch of line){
+    const n=enc.encode(ch).length;
+    if(bytes+n>75){out.push(cur);cur=' ';bytes=1;}
+    cur+=ch;bytes+=n;
+  }
+  out.push(cur);
+  return out.join('\r\n');
+}
+function buildICS(list,now=Date.now()){
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Creavy Calls//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  list.forEach(c=>{
+    L.push('BEGIN:VEVENT','UID:creavy-'+c.id+'@creavy-calls','SEQUENCE:'+Math.floor(now/1000),
+      'DTSTAMP:'+icsDT(now),'DTSTART:'+icsDT(c.callbackAt),'DTEND:'+icsDT(c.callbackAt+15*MIN),
+      'SUMMARY:'+icsEsc('Call '+(c.name||fmtPhone(c.phone))+' (Creavy)'),
+      'DESCRIPTION:'+icsEsc(callDesc(c)),
+      'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Call now','END:VALARM','END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.map(icsFold).join('\r\n')+'\r\n';
+}
+const csvCell=v=>{v=String(v==null?'':v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+function toCSV(list){
+  const head=['Phone','Name','What they make','Shop or products','City','Reply','Number of calls','Last call','Callback','Talk about on callback','What they need','Notes','Added'];
+  const rows=list.map(c=>{
+    const last=c.calls[c.calls.length-1];
+    return ['+91 '+fmtPhone(c.phone),c.name,c.cat||'',c.shop,c.city,info(statusOf(c)).label,c.calls.length,
+      last?new Date(last.at).toLocaleString('en-IN'):'',c.callbackAt?new Date(c.callbackAt).toLocaleString('en-IN'):'',c.cbNote||'',(c.tags||[]).join('; '),
+      c.notes,new Date(c.addedAt).toLocaleDateString('en-IN')].map(csvCell).join(',');
+  });
+  return [head.join(',')].concat(rows).join('\r\n');
+}
+/* ================= END LOGIC ================= */
+
+/* ================= STATE ================= */
+const KEY='creavy-calls-v1';
+const DEFAULT_WA="Namaste {name}! I'm calling from Creavy (creavy.in), a marketplace for handmade products by Indian artisans. Thank you for talking with me. Reply here anytime if you want to know more about selling on Creavy.";
+// What a seller makes, and what they need from Creavy. You can change both lists in Settings.
+const DEFAULT_CATS=["Women's wear & sarees","Men's wear","Kids & baby","Jewelry & accessories","Bags & clutches","Art & home decor","Handloom home textiles","Terracotta & clay craft","Kantha & embroidery","Brass, bell metal & Dokra","Wood, bamboo & cane","Leather goods","Candles & diyas","Bridal essentials","Personalized gifts","Other"];
+const DEFAULT_TAGS=['Needs product photo help','Needs catalog or price upload','No GST, needs enrolment ID','Has GSTIN ready','Check iThink pincode pickup','Fragile packaging guidance','Custom or made-to-order items','Wants WhatsApp onboarding'];
+const blank=()=>({v:1,contacts:[],pending:null,pendingShown:false,lastBackup:0,settings:{wa:DEFAULT_WA,cats:DEFAULT_CATS.slice(),tags:DEFAULT_TAGS.slice(),custom:[]}});
+// A list typed in Settings, one item per line: trimmed, no repeats, not too long.
+function cleanList(a,def){
+  if(!Array.isArray(a))return def.slice();
+  const seen=new Set(),out=[];
+  a.forEach(s=>{s=String(s==null?'':s).replace(/\s+/g,' ').trim().slice(0,50);const k=s.toLowerCase();if(s&&!seen.has(k)&&out.length<40){seen.add(k);out.push(s);}});
+  return out;
+}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function normContact(x){
+  if(!x||typeof x!=='object')return null;
+  const phone=normPhone(x.phone);
+  if(!phone)return null;
+  const num=v=>(isFinite(v)&&+v>0)?+v:null;
+  const calls=Array.isArray(x.calls)?x.calls.filter(k=>k&&isFinite(k.at)).map(k=>({at:+k.at,outcome:isOutcome(k.outcome)?k.outcome:(/^x[a-z0-9]{3,16}$/.test(String(k.outcome))?'other':null)})):[];
+  return{
+    id:String(x.id||'').replace(/[^a-z0-9]/gi,'')||uid(),phone,
+    name:String(x.name||'').slice(0,80),shop:String(x.shop||'').slice(0,80),city:String(x.city||'').slice(0,60),
+    cat:String(x.cat||'').slice(0,60),
+    tags:Array.isArray(x.tags)?x.tags.map(t=>String(t).trim().slice(0,60)).filter((t,i,a)=>t&&a.indexOf(t)===i).slice(0,20):[],
+    notes:String(x.notes||'').slice(0,3000),addedAt:num(x.addedAt)||Date.now(),calls,
+    callbackAt:num(x.callbackAt),cbNote:String(x.cbNote||'').slice(0,120),notifiedAt:num(x.notifiedAt),prevCb:num(x.prevCb),sample:x.sample===true
+  };
+}
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(d&&Array.isArray(d.contacts)){
+      const b=blank(),seen=new Set(),st=d.settings&&typeof d.settings==='object'?d.settings:{};
+      if(typeof st.wa==='string')b.settings.wa=st.wa;
+      b.settings.cats=cleanList(st.cats,DEFAULT_CATS);
+      b.settings.tags=cleanList(st.tags,DEFAULT_TAGS);
+      b.settings.custom=cleanCustom(st.custom);
+      setCustom(b.settings.custom);
+      b.contacts=d.contacts.map(normContact).filter(c=>c&&!seen.has(c.phone)&&seen.add(c.phone));
+      b.pending=d.pending||null;b.pendingShown=!!d.pendingShown;b.lastBackup=+d.lastBackup||0;
+      return b;
+    }
+  }catch(e){}
+  return blank();
+}
+let db=load();
+let saveWarned=false;
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(db));}
+  catch(e){if(!saveWarned){saveWarned=true;toast('Could not save on this device. Storage is full or blocked.');}}
+}
+const get=id=>db.contacts.find(c=>c.id===id);
+const byPhone=p=>db.contacts.find(c=>c.phone===p);
+function makeContact(phone,f){
+  f=f||{};
+  return{id:uid(),phone,name:(f.name||'').trim().slice(0,80),shop:'',city:'',cat:String(f.cat||'').slice(0,60),tags:[],notes:(f.notes||'').trim().slice(0,3000),
+    addedAt:Date.now(),calls:[],callbackAt:null,cbNote:'',notifiedAt:null,prevCb:null,sample:false};
+}
+function statusText(c){
+  const st=statusOf(c);
+  if(st==='new')return 'Not called yet. It is in your Calling list.';
+  const last=c.calls[c.calls.length-1];
+  return info(st).label+'. Last call '+fmtWhen(last.at)+(c.calls.length>1?', '+c.calls.length+' calls in total':'')+'.';
+}
+
+/* ================= UI HELPERS ================= */
+const ACT={};
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const dn=c=>c.name||fmtPhone(c.phone);
+const svg=d=>'<svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';
+const IC={
+  phone:svg('<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>'),
+  chat:svg('<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>'),
+  clock:svg('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
+  list:svg('<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>'),
+  done:svg('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'),
+  sliders:svg('<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>'),
+  plus:svg('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'),
+  cal:svg('<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'),
+  x:svg('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>')
+};
+
+let view='today',sheet=null,dlgOpen=false,dlgBtns=[],toastFn=null,toastT=0,deferredInstall=null,lastDue=-1,skipPop=false;
+const F={q:'',ql:100,cq:'',cl:100,cf:'all'};
+const isStandalone=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
+
+function toast(msg,o){
+  o=o||{};
+  const t=$('#toast');
+  t.innerHTML='<span>'+esc(msg)+'</span>'+(o.action?'<button data-act="toastact">'+esc(o.action.label)+'</button>':'');
+  toastFn=o.action?o.action.fn:null;
+  t.hidden=false;
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>{t.hidden=true;},o.ms||2800);
+}
+ACT.toastact=()=>{const f=toastFn;$('#toast').hidden=true;toastFn=null;if(f)f();};
+
+function dialog(o){
+  dlgBtns=o.buttons&&o.buttons.length?o.buttons:[{label:'OK',primary:true}];
+  const tone=o.level==='block'?'t-red':o.level==='warn'?'t-amber':'';
+  $('#dlgRoot').innerHTML='<div class="backdrop center"><div class="dlg '+tone+'" role="alertdialog" aria-modal="true"><h3>'+esc(o.title||'')+'</h3><div class="dm">'+(o.html||esc(o.msg||'').replace(/\n/g,'<br>'))+'</div><div class="dbtns">'+
+    dlgBtns.map((b,i)=>'<button class="btn block'+(b.primary?' pri':'')+(b.danger?' danger':'')+'" data-act="dlgbtn" data-i="'+i+'">'+esc(b.label)+'</button>').join('')+'</div></div></div>';
+  dlgOpen=true;
+}
+function closeDlg(){$('#dlgRoot').innerHTML='';dlgOpen=false;}
+ACT.dlgbtn=el=>{const b=dlgBtns[+el.dataset.i];closeDlg();if(b&&b.fn)b.fn();};
+
+/* sheets: bottom panels. One history entry so the phone's Back button closes them. */
+const wrapSheet=h=>'<div class="backdrop"><div class="sheet" role="dialog" aria-modal="true">'+h+'</div></div>';
+function openSheet(st){
+  if(sheet&&sheet.type==='detail')saveDetail(true);
+  const had=!!sheet;
+  sheet=st;
+  document.body.classList.add('lock');
+  if(!had){try{history.pushState({sheet:1},'');}catch(e){}}
+}
+function closeSheet(fromPop){
+  if(!sheet)return;
+  if(sheet.type==='detail')saveDetail(true);
+  sheet=null;
+  $('#layer').innerHTML='';
+  document.body.classList.remove('lock');
+  if(!fromPop){try{if(history.state&&history.state.sheet){skipPop=true;history.back();}}catch(e){}}
+}
+window.addEventListener('popstate',()=>{
+  if(skipPop){
+    skipPop=false;
+    if(sheet&&!(history.state&&history.state.sheet)){try{history.pushState({sheet:1},'');}catch(e){}}
+    return;
+  }
+  if(dlgOpen)closeDlg();
+  if(sheet)closeSheet(true);
+});
+ACT.close=()=>closeSheet();
+
+/* ================= VIEWS ================= */
+function chip(st){const s=info(st);return '<span class="chip t-'+s.tone+'">'+esc(s.label)+'</span>';}
+
+function row(c){
+  const st=statusOf(c),s=info(st),now=Date.now(),last=c.calls[c.calls.length-1];
+  const due=!!(c.callbackAt&&c.callbackAt<=now);
+  const where=[c.shop,c.city].filter(Boolean).map(esc).join(', ');
+  const callBtn='<button class="btn pri sm" data-act="call" data-id="'+c.id+'">'+IC.phone+'Call</button>';
+  const logBtn='<button class="btn sm" data-act="log" data-id="'+c.id+'">Log reply</button>';
+  let acts=st==='new'?callBtn+logBtn:callBtn;
+  if(st==='dialed')acts='<button class="btn pri sm" data-act="log" data-id="'+c.id+'">Log reply</button><button class="btn sm" data-act="call" data-id="'+c.id+'">'+IC.phone+'Call</button>';
+  if(c.callbackAt)acts+='<button class="btn sm" data-act="snooze" data-id="'+c.id+'">'+IC.clock+'Later</button>';
+  acts+='<button class="btn sm" data-act="wa" data-id="'+c.id+'">'+IC.chat+'WhatsApp</button>';
+  const tg=(c.cat?'<span class="tag cat">'+esc(c.cat)+'</span>':'')+c.tags.slice(0,3).map(t=>'<span class="tag">'+esc(t)+'</span>').join('')+(c.tags.length>3?'<span class="tag">+'+(c.tags.length-3)+' more</span>':'');
+  return '<div class="item t-'+s.tone+'" data-act="open" data-id="'+c.id+'">'+
+    '<div class="top"><div><div class="nm">'+esc(c.name||'Unnamed seller')+'</div><div class="ph">'+fmtPhone(c.phone)+'</div></div>'+(st==='new'?'':chip(st))+'</div>'+
+    (where?'<div class="sub">'+where+'</div>':'')+
+    '<div class="meta">'+(last?'Called '+fmtDT(last.at)+(c.calls.length>1?', '+c.calls.length+' calls':''):'Added '+fmtDT(c.addedAt))+'</div>'+
+    (c.callbackAt?'<div class="cb'+(due?' over':'')+'">'+IC.clock+'<span>'+(due?'Callback due ':'Callback ')+fmtDT(c.callbackAt)+'</span></div>'+(c.cbNote?'<div class="why">Talk about: '+esc(c.cbNote)+'</div>':''):'')+
+    (tg?'<div class="tags">'+tg+'</div>':'')+
+    (c.notes?'<div class="note">'+esc(c.notes)+'</div>':'')+
+    '<div class="acts">'+acts+'</div></div>';
+}
+const section=(title,list)=>list.length?'<h2 class="sec">'+title+'<span class="count">'+list.length+'</span></h2><div class="list">'+list.map(c=>row(c)).join('')+'</div>':'';
+
+// One short reminder at a time, below the call card.
+function banners(){
+  if('Notification' in window&&Notification.permission==='default'&&db.contacts.length)
+    return '<div class="banner"><span>Get an alert when a callback is due.</span><button class="btn pri sm" data-act="askalerts">Turn on</button></div>';
+  if(deferredInstall)
+    return '<div class="banner"><span>Install Creavy Calls on your phone.</span><button class="btn pri sm" data-act="install">Install</button></div>';
+  if(db.contacts.length>=10&&Date.now()-db.lastBackup>7*DAY)
+    return '<div class="banner"><span>'+(db.lastBackup?'Last backup was '+fmtDT(db.lastBackup)+'.':'You have not backed up yet.')+'</span><button class="btn sm" data-act="exportjson">Back up</button></div>';
+  return '';
+}
+function hero(due,fresh){
+  const c=due[0]||fresh[0];
+  if(!c)return '<section class="hero"><p class="kick">No numbers waiting</p><p class="big">Add numbers to start</p><p class="hn">Each number is saved once. The app warns you before you call it again.</p><div class="go"><button class="btn haldi block" data-act="add">'+IC.plus+'Add numbers</button></div></section>'+
+    '<ol class="how"><li>Add the numbers you want to call. They wait in your Calling list.</li><li>Press Call. Your phone dials.</li><li>After the call, choose what they replied and write what they need.</li></ol>';
+  const cb=!!due[0];
+  return '<section class="hero"><p class="kick">'+(cb?'Call back now':'Call next')+'</p>'+
+    '<p class="big">'+esc(c.name||'Unnamed seller')+'</p><p class="num">'+fmtPhone(c.phone)+'</p>'+
+    (cb?'<p class="pl"><span class="pill">Promised '+fmtDT(c.callbackAt)+'</span></p>':'')+
+    (cb&&c.cbNote?'<p class="hn">Talk about: '+esc(c.cbNote)+'</p>':(c.notes?'<p class="hn">'+esc(c.notes)+'</p>':''))+
+    '<div class="go"><button class="btn haldi block" data-act="call" data-id="'+c.id+'">'+IC.phone+'Call now</button></div>'+
+    (!cb&&fresh.length>1?'<p class="more">'+(fresh.length-1)+' more waiting</p>':'')+'</section>';
+}
+function viewToday(){
+  const now=Date.now(),C=db.contacts;
+  const due=C.filter(c=>c.callbackAt&&c.callbackAt<=now).sort((a,b)=>a.callbackAt-b.callbackAt);
+  const up=C.filter(c=>c.callbackAt&&c.callbackAt>now).sort((a,b)=>a.callbackAt-b.callbackAt);
+  const needs=C.filter(c=>statusOf(c)==='dialed').sort((a,b)=>b.calls[b.calls.length-1].at-a.calls[a.calls.length-1].at);
+  const fresh=C.filter(c=>statusOf(c)==='new').sort((a,b)=>a.addedAt-b.addedAt);
+  return hero(due,fresh)+banners()+section('Also due',due.slice(1))+section('Log what they said',needs)+section('Coming up',up);
+}
+function viewQueue(){
+  const n=db.contacts.filter(c=>statusOf(c)==='new').length;
+  return '<p class="hint" style="margin:6px 2px 8px">'+n+(n===1?' number is':' numbers are')+' waiting in your calling list, oldest first.</p><input id="q" type="search" placeholder="Search name, number or category" value="'+esc(F.q)+'" autocomplete="off"><div id="list" class="mt"></div>';
+}
+const calledList=()=>db.contacts.filter(c=>c.calls.length).sort((a,b)=>b.calls[b.calls.length-1].at-a.calls[a.calls.length-1].at);
+function viewCalled(){
+  const all=calledList(),cnt={};
+  all.forEach(c=>{const s=statusOf(c);cnt[s]=(cnt[s]||0)+1;});
+  if(F.cf!=='all'&&!cnt[F.cf])F.cf='all';
+  const order=['dialed'].concat(Object.keys(OUTCOMES));
+  const chips=['<button class="pick'+(F.cf==='all'?' sel':'')+'" data-act="cf" data-k="all">All '+all.length+'</button>'].concat(
+    order.filter(k=>cnt[k]).map(k=>'<button class="pick'+(F.cf===k?' sel':'')+'" data-act="cf" data-k="'+k+'">'+esc(k==='dialed'?'Log reply':info(k).label)+' '+cnt[k]+'</button>')).join('');
+  return '<input id="q" type="search" placeholder="Search name, number or notes" value="'+esc(F.cq)+'" autocomplete="off"><div class="chiprow">'+chips+'</div><div id="list"></div>';
+}
+function match(c,q){
+  q=(q||'').toLowerCase().trim();
+  if(!q)return true;
+  const digits=q.replace(/\D/g,'');
+  return (c.name+' '+c.shop+' '+c.city+' '+c.notes+' '+c.cat+' '+c.tags.join(' ')+' '+c.cbNote).toLowerCase().includes(q)||(digits.length>=3&&c.phone.includes(digits));
+}
+function renderList(){
+  const box=$('#list');if(!box)return;
+  let items,lim,empty;
+  if(view==='queue'){
+    items=db.contacts.filter(c=>statusOf(c)==='new'&&match(c,F.q)).sort((a,b)=>a.addedAt-b.addedAt);lim=F.ql;
+    empty=F.q?'No number matches your search.':'No numbers waiting. Tap Add numbers to add some.';
+  }else{
+    items=calledList().filter(c=>(F.cf==='all'||statusOf(c)===F.cf)&&match(c,F.cq));lim=F.cl;
+    empty=F.cq?'No number matches your search.':'Numbers you call will show here with what happened.';
+  }
+  box.innerHTML=items.length?'<div class="list">'+items.slice(0,lim).map(c=>row(c)).join('')+'</div>'+(items.length>lim?'<button class="btn block mt" data-act="more">Show more ('+(items.length-lim)+' left)</button>':''):'<div class="empty">'+empty+'</div>';
+}
+function viewSettings(){
+  const perm='Notification' in window?Notification.permission:'unsupported';
+  const standalone=isStandalone(),ios=isIOS();
+  const permTxt={
+    granted:'Alerts are on.',
+    denied:'Alerts are blocked. Allow notifications for this site in your browser settings.',
+    default:'Alerts are off.',
+    unsupported:ios&&!standalone?'On iPhone, tap Share, then Add to Home Screen. Open the app from your home screen, then turn on alerts here.':'This browser cannot show alerts.'
+  }[perm];
+  const S=db.settings,samples=db.contacts.filter(c=>c.sample).length;
+  const usedBy=k=>db.contacts.filter(c=>c.calls.some(x=>x.outcome===k)).length;
+  const customRows=S.custom.map(o=>{
+    const n=usedBy(o.k);
+    return '<div class="hist"><span>'+esc(o.label)+'</span><span class="row"><span class="hint">'+(n?'Used for '+n+(n===1?' seller':' sellers'):'Not used yet')+'</span>'+(n?'':'<button class="btn quiet sm" data-act="delcustom" data-k="'+o.k+'">Remove</button>')+'</span></div>';
+  }).join('');
+  return '<div class="panel"><h3>Callback alerts</h3><p>'+permTxt+'</p>'+
+    '<div class="row wrap">'+(perm==='default'?'<button class="btn pri sm" data-act="askalerts">Turn on alerts</button>':'')+'<button class="btn sm" data-act="testalert">Send a test alert</button></div>'+
+    '<p class="hint mt">Alerts ring while the app is open or was used a short while ago. A web app cannot wake itself when it is fully closed. For a guaranteed alarm, add the callback to your phone calendar: use the calendar buttons on a callback, or download all callbacks here.</p>'+
+    '<div class="row"><button class="btn sm" data-act="icsall">'+IC.cal+'Download all callbacks</button></div></div>'+
+    '<div class="panel"><h3>WhatsApp message</h3><textarea id="s_wa" rows="5">'+esc(S.wa)+'</textarea><p class="hint">{name} is replaced with the seller\'s name.</p></div>'+
+    '<div class="panel"><h3>Your own reply options</h3><p class="hint">Add a reply you hear often. It shows up when you log what a seller said.</p>'+customRows+
+      '<div class="row mt"><input id="s_custom" type="text" maxlength="40" placeholder="For example: Will decide later" autocomplete="off"><button class="btn pri sm" data-act="addcustom">Add</button></div></div>'+
+    '<div class="panel"><h3>Categories and needs</h3><p class="hint">One per line. You pick from these when you add or log a seller. Sellers you already saved keep what they have.</p>'+
+      '<label for="s_cats">What sellers make</label><textarea id="s_cats" rows="7">'+esc(S.cats.join('\n'))+'</textarea>'+
+      '<label for="s_tags">What sellers need</label><textarea id="s_tags" rows="7">'+esc(S.tags.join('\n'))+'</textarea>'+
+      '<div class="row wrap"><button class="btn pri sm" data-act="savelists">Save lists</button><button class="btn sm" data-act="resetlists">Use the standard lists</button></div></div>'+
+    '<div class="panel"><h3>Backup</h3><p>'+(db.lastBackup?'Last backup: '+fmtDT(db.lastBackup)+'.':'You have not backed up yet.')+'</p><p class="hint">Your numbers are saved only in this app on this phone. Download a backup now and then. You can restore it on any phone. Restore also reads backups from the older Creavy seller CRM.</p>'+
+    '<div class="row wrap"><button class="btn sm" data-act="exportjson">Download backup</button><button class="btn sm" data-act="importjson">Restore backup</button><button class="btn sm" data-act="exportcsv">Export to Excel (CSV)</button></div></div>'+
+    (standalone?'':'<div class="panel"><h3>Install on your phone</h3>'+(deferredInstall?'<button class="btn pri sm" data-act="install">Install app</button>':'<p>'+(ios?'Tap Share, then Add to Home Screen.':'In Chrome, open the menu and tap Install app or Add to Home screen.')+'</p>')+'</div>')+
+    '<div class="panel"><h3>Try it with sample sellers</h3><p class="hint">Adds 3 made-up sellers so you can see the warnings and reminders. The app never dials them. Remove them any time.</p><div class="row">'+(samples?'<button class="btn sm" data-act="rmsamples">Remove sample sellers</button>':'<button class="btn sm" data-act="addsamples">Add 3 sample sellers</button>')+'</div></div>'+
+    '<div class="panel"><h3>Delete everything</h3><p class="hint">Removes all numbers, notes and call history from this phone. Download a backup first.</p><div class="row"><button class="btn danger sm" data-act="wipe">Delete all data</button></div></div>'+
+    '<p class="hint" style="text-align:center;margin-top:6px">Creavy Calls, version 2</p>';
+}
+function summary(){
+  const now=Date.now(),sod=startOfDay(now),C=db.contacts;
+  const calls=C.reduce((n,c)=>n+c.calls.filter(x=>x.at>=sod).length,0);
+  const due=C.filter(c=>c.callbackAt&&c.callbackAt<=now).length;
+  const wait=C.filter(c=>statusOf(c)==='new').length;
+  const parts=[calls+(calls===1?' call':' calls')+' today'];
+  if(due)parts.push(due+' due now');
+  parts.push(wait+' waiting');
+  return parts.join(', ');
+}
+function updateNav(){
+  const now=Date.now();
+  const due=db.contacts.filter(c=>c.callbackAt&&c.callbackAt<=now).length;
+  const needs=db.contacts.filter(c=>statusOf(c)==='dialed').length;
+  $$('nav button').forEach(b=>{
+    const t=b.dataset.tab,em=$('em',b),n=t==='today'?due:t==='called'?needs:0;
+    b.classList.toggle('on',t===view);
+    em.textContent=n;em.hidden=!n;
+  });
+  $('#sum').textContent=summary();
+  setBadge(due);
+}
+function render(){
+  const y=window.scrollY;
+  $('#view').innerHTML=({today:viewToday,queue:viewQueue,called:viewCalled,settings:viewSettings})[view]();
+  if(view==='queue'||view==='called')renderList();
+  $('#fab').hidden=view==='settings';
+  updateNav();
+  window.scrollTo(0,y);
+}
+function renderIfIdle(){
+  const a=document.activeElement;
+  if(view==='today'&&!sheet&&!dlgOpen&&!(a&&/INPUT|TEXTAREA/.test(a.tagName)))render();else updateNav();
+}
+ACT.tab=el=>{view=el.dataset.tab;render();window.scrollTo(0,0);};
+ACT.cf=el=>{F.cf=el.dataset.k;F.cl=100;render();};
+ACT.more=()=>{if(view==='queue')F.ql+=100;else F.cl+=100;renderList();};
+
+/* ================= CALLING ================= */
+function dial(phone){const a=document.createElement('a');a.href='tel:+91'+phone;document.body.appendChild(a);a.click();a.remove();}
+function openLink(url){const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();}
+function waText(c){
+  return String(db.settings.wa||DEFAULT_WA).replace(/\{name\}/g,c.name||'').replace(/\s+([!,.])/g,'$1').replace(/[ \t]{2,}/g,' ').trim();
+}
+function openWA(id){
+  const c=get(id);if(!c)return;
+  openLink('https://wa.me/91'+c.phone+'?text='+encodeURIComponent(waText(c)));
+}
+function startCall(id,force){
+  const c=get(id);if(!c)return;
+  const g=guard(c);
+  if(g&&!force){
+    dialog({level:g.level,title:g.title,msg:g.msg,buttons:[{label:'Cancel',primary:true},{label:'Call anyway',danger:true,fn:()=>startCall(id,true)}]});
+    return;
+  }
+  const last=c.calls[c.calls.length-1];
+  if(last&&!last.outcome)last.at=Date.now();                  // the earlier call never got a result: reuse it
+  else{c.prevCb=c.callbackAt||null;c.calls.push({at:Date.now(),outcome:null});}
+  c.callbackAt=null;c.notifiedAt=null;
+  db.pending=id;db.pendingShown=false;
+  save();
+  if(sheet)closeSheet();
+  render();
+  if(c.sample){db.pendingShown=true;save();toast('This is a sample seller, so your phone will not dial.',{ms:3500});openOutcome(id,'new');return;}
+  dial(c.phone);
+}
+ACT.call=el=>startCall(el.dataset.id);
+ACT.wa=el=>openWA(el.dataset.id);
+ACT.log=el=>openOutcome(el.dataset.id,'new');
+ACT.fix=el=>openOutcome(el.dataset.id,'fix');
+
+/* ================= ADD NUMBERS ================= */
+function openAdd(tab){openSheet({type:'add',tab:tab||'one'});renderAdd();}
+function renderAdd(){
+  const one=sheet.tab==='one';
+  $('#layer').innerHTML=wrapSheet(
+    '<div class="sheet-head"><h2>Add numbers</h2><span class="sp"></span><button class="btn quiet sm" data-act="close">Done</button></div>'+
+    '<div class="sheet-body"><div class="seg"><button class="'+(one?'on':'')+'" data-act="addtab" data-t="one">One number</button><button class="'+(one?'':'on')+'" data-act="addtab" data-t="many">Paste many</button></div>'+
+    (one?
+      '<label for="a_phone">Mobile number</label><input id="a_phone" type="tel" inputmode="tel" autocomplete="off" placeholder="98765 43210"><div id="a_hint"></div>'+
+      '<label for="a_name">Name (optional)</label><input id="a_name" type="text" autocomplete="off" autocapitalize="words" maxlength="80">'+
+      '<label for="a_cat">What do they make? (optional)</label><select id="a_cat">'+catOptions(sheet.cat||'')+'</select>'+
+      '<label for="a_notes">Notes or requirements (optional)</label><textarea id="a_notes" maxlength="3000"></textarea>'
+     :
+      '<label for="a_many">Paste numbers, one per line. A name is optional.</label><textarea id="a_many" rows="9" placeholder="98765 43210 Ramesh&#10;Sita, +91 91234 56780&#10;99887 76655"></textarea><p class="hint mt">Repeated numbers, numbers you already saved and invalid numbers are skipped. New numbers go to your Calling list.</p>')+
+    '</div><div class="sheet-foot">'+(one?'<button class="btn" data-act="saveone">Save, add next</button><button class="btn pri" data-act="saveonecall">Save and call</button>':'<button class="btn pri" data-act="savemany">Add all</button>')+'</div>');
+  setTimeout(()=>{const e=$(one?'#a_phone':'#a_many');if(e)e.focus();},60);
+}
+ACT.add=()=>openAdd('one');
+ACT.addtab=el=>{const k=$('#a_cat');if(k)sheet.cat=k.value;sheet.tab=el.dataset.t;renderAdd();};
+function checkPhone(){
+  const el=$('#a_phone'),h=$('#a_hint');
+  if(!el||!h)return;
+  const v=el.value.trim();
+  if(!v){h.innerHTML='';return;}
+  const p=normPhone(v);
+  if(!p){h.innerHTML='<div class="alert">'+(v.replace(/\D/g,'').length<10?'Keep typing. A mobile number has 10 digits.':'Enter a 10-digit mobile number that starts with 6, 7, 8 or 9.')+'</div>';return;}
+  const ex=byPhone(p);
+  h.innerHTML=ex?
+    '<div class="alert '+((OUTCOMES[statusOf(ex)]||{}).dnc?'bad':'warn')+'"><b>Already in your list'+(ex.name?': '+esc(ex.name):'')+'</b><br>'+esc(statusText(ex))+'<br><button class="btn sm mt" data-act="open" data-id="'+ex.id+'">View this number</button></div>':
+    '<div class="alert ok">New number: +91 '+fmtPhone(p)+'</div>';
+}
+function saveOne(thenCall){
+  const p=normPhone($('#a_phone').value);
+  if(!p){toast('Enter a 10-digit mobile number that starts with 6, 7, 8 or 9.');$('#a_phone').focus();return;}
+  const ex=byPhone(p);
+  if(ex){
+    dialog({level:'warn',title:'Already in your list',msg:fmtPhone(p)+(ex.name?' ('+ex.name+')':'')+'\n'+statusText(ex),buttons:[{label:'Close',primary:true},{label:'View this number',fn:()=>openDetail(ex.id)}]});
+    return;
+  }
+  sheet.cat=$('#a_cat').value;
+  const c=makeContact(p,{name:$('#a_name').value,notes:$('#a_notes').value,cat:sheet.cat});
+  db.contacts.push(c);save();
+  if(thenCall){closeSheet();render();startCall(c.id);return;}
+  ['#a_phone','#a_name','#a_notes'].forEach(s=>{$(s).value='';});
+  $('#a_hint').innerHTML='';
+  render();
+  toast('Saved. Add the next number.');
+  $('#a_phone').focus();
+}
+ACT.saveone=()=>saveOne(false);
+ACT.saveonecall=()=>saveOne(true);
+ACT.savemany=()=>{
+  const items=parseBulk($('#a_many').value);
+  if(!items.length){toast('Paste some numbers first.');return;}
+  let added=0;const bad=[],dup=[],seen=new Set();
+  items.forEach(it=>{
+    if(!it.phone){bad.push(it.raw);return;}
+    if(seen.has(it.phone)){dup.push({phone:it.phone,why:'repeated in what you pasted'});return;}
+    seen.add(it.phone);
+    const ex=byPhone(it.phone);
+    if(ex){dup.push({phone:it.phone,why:info(statusOf(ex)).label});return;}
+    db.contacts.push(makeContact(it.phone,{name:it.name}));added++;
+  });
+  save();render();
+  const li=a=>a.map(x=>'<li>'+x+'</li>').join('');
+  let h='<p><b>'+added+'</b> added to your Calling list.</p>';
+  if(dup.length)h+='<p class="mt"><b>'+dup.length+'</b> skipped because they are already saved:</p><ul>'+li(dup.slice(0,8).map(d=>esc(fmtPhone(d.phone))+': '+esc(d.why)))+'</ul>'+(dup.length>8?'<p class="hint">and '+(dup.length-8)+' more</p>':'');
+  if(bad.length)h+='<p class="mt"><b>'+bad.length+'</b> skipped because they are not valid mobile numbers:</p><ul>'+li(bad.slice(0,5).map(esc))+'</ul>'+(bad.length>5?'<p class="hint">and '+(bad.length-5)+' more</p>':'');
+  if(added)$('#a_many').value='';
+  dialog({title:'Numbers added',html:h,buttons:[{label:'OK',primary:true}]});
+};
+
+/* ================= TIME PICKER (shared by outcome and snooze sheets) ================= */
+function timeBoxHTML(withNone){
+  return '<div class="chips">'+presets().map(p=>'<button class="pick" data-act="pickpre" data-k="'+p.k+'">'+esc(p.label)+'</button>').join('')+(withNone?'<button class="pick" data-act="pickpre" data-k="none">No reminder</button>':'')+
+    '</div><label for="o_time">Or pick a date and time</label><input id="o_time" type="datetime-local" step="300"><p id="timeSum" class="hint mt"></p>';
+}
+function markPicks(k){$$('#layer [data-act="pickpre"]').forEach(b=>b.classList.toggle('sel',b.dataset.k===k));}
+function updTimeSum(){const e=$('#timeSum');if(e)e.textContent=sheet&&sheet.cbAt?'Reminder: '+fmtDT(sheet.cbAt):'';}
+ACT.pickpre=el=>{
+  const k=el.dataset.k;let ts=null;
+  if(k!=='none'){const p=presets().find(x=>x.k===k);ts=p?p.ts:null;}
+  sheet.cbAt=ts;
+  $('#o_time').value=ts?toLocalInput(ts):'';
+  markPicks(k);updTimeSum();
+};
+function setCb(c,ts){c.callbackAt=ts;if(!ts)c.cbNote='';c.notifiedAt=null;save();}
+
+/* ================= OUTCOME SHEET ================= */
+// Pick lists used by the add, reply and detail sheets.
+function catOptions(cur){
+  const list=db.settings.cats.slice();
+  if(cur&&!list.includes(cur))list.push(cur);
+  return '<option value="">Not set</option>'+list.map(x=>'<option value="'+esc(x)+'"'+(x===cur?' selected':'')+'>'+esc(x)+'</option>').join('');
+}
+function tagChips(sel,act){
+  const list=db.settings.tags.slice();
+  sel.forEach(t=>{if(!list.includes(t))list.push(t);});
+  if(!list.length)return '<p class="hint">No needs in your list yet. Add some in Settings.</p>';
+  return '<div class="chips" role="group" aria-label="What they need">'+list.map(t=>'<button type="button" class="pick'+(sel.includes(t)?' sel':'')+'" aria-pressed="'+(sel.includes(t)?'true':'false')+'" data-act="'+act+'" data-t="'+esc(t)+'">'+esc(t)+'</button>').join('')+'</div>';
+}
+ACT.togtag=el=>{
+  const t=el.dataset.t,i=sheet.tags.indexOf(t);
+  if(i<0)sheet.tags.push(t);else sheet.tags.splice(i,1);
+  el.classList.toggle('sel',i<0);el.setAttribute('aria-pressed',i<0?'true':'false');
+};
+ACT.dtag=el=>{
+  const c=sheet&&get(sheet.id);
+  if(!c)return;
+  const t=el.dataset.t,i=c.tags.indexOf(t);
+  if(i<0)c.tags.push(t);else c.tags.splice(i,1);
+  save();el.classList.toggle('sel',i<0);el.setAttribute('aria-pressed',i<0?'true':'false');
+};
+function openOutcome(id,mode){
+  const c=get(id);if(!c)return;
+  const last=c.calls[c.calls.length-1];
+  const unlogged=!!(last&&!last.outcome);
+  const m=unlogged?'complete':(mode==='fix'&&last?'fix':'new');
+  const st={type:'outcome',id,mode:m,outcome:null,cbAt:null,cbNote:'',name:c.name,notes:c.notes,cat:c.cat,tags:c.tags.slice()};
+  if(m==='fix'){st.outcome=last.outcome;st.cbAt=c.callbackAt;st.cbNote=c.cbNote||'';}
+  openSheet(st);renderOutcome();
+}
+function renderOutcome(){
+  const s=sheet,c=get(s.id);
+  if(!c){closeSheet();return;}
+  const opts=Object.keys(OUTCOMES).map(k=>'<button class="opt t-'+OUTCOMES[k].tone+(s.outcome===k?' sel':'')+'" data-act="pickout" data-k="'+k+'">'+esc(OUTCOMES[k].label)+'</button>').join('');
+  $('#layer').innerHTML=wrapSheet(
+    '<div class="sheet-head"><div><h2>'+(s.mode==='fix'?'Change last reply':'What did the seller say?')+'</h2><div class="ph">'+esc(c.name||'Unnamed seller')+', +91 '+fmtPhone(c.phone)+'</div></div><span class="sp"></span><button class="btn quiet sm" data-act="close" aria-label="Close">'+IC.x+'</button></div>'+
+    '<div class="sheet-body"><div class="grid2 mt">'+opts+'</div>'+
+    '<div id="timeBox" hidden><label id="timeLabel"></label>'+timeBoxHTML(true)+
+      '<label for="o_cbnote">What will you talk about? (optional)</label><input id="o_cbnote" type="text" maxlength="120" autocomplete="off" placeholder="For example: send the price list" value="'+esc(s.cbNote)+'"></div>'+
+    '<label for="o_name">Name</label><input id="o_name" type="text" maxlength="80" autocapitalize="words" value="'+esc(s.name)+'">'+
+    '<label for="o_cat">What do they make?</label><select id="o_cat">'+catOptions(s.cat)+'</select>'+
+    '<label>What do they need?</label>'+tagChips(s.tags,'togtag')+
+    '<label for="o_notes">Notes: what they said and what they need</label><textarea id="o_notes" maxlength="3000">'+esc(s.notes)+'</textarea>'+
+    (s.mode==='complete'?'<button class="btn quiet block mt" data-act="notcalled">I did not actually call this number</button>':'')+
+    '</div><div class="sheet-foot"><button class="btn pri" id="o_save" data-act="saveout" disabled>Choose a reply</button></div>');
+  if(s.outcome)syncTimeBox();
+  if(s.cbAt){$('#o_time').value=toLocalInput(s.cbAt);updTimeSum();}
+}
+function syncOutcomeInputs(){
+  const n=$('#o_name'),t=$('#o_notes'),k=$('#o_cat'),w=$('#o_cbnote');
+  if(n)sheet.name=n.value;if(t)sheet.notes=t.value;if(k)sheet.cat=k.value;if(w)sheet.cbNote=w.value;
+}
+function syncTimeBox(){
+  const o=OUTCOMES[sheet.outcome],box=$('#timeBox'),btn=$('#o_save');
+  if(!o)return;
+  btn.disabled=false;btn.textContent='Save';
+  box.hidden=!!o.final;
+  $('#timeLabel').textContent=o.needsTime?'When should I remind you to call back?':'Set a reminder to follow up (optional)';
+  const none=$('#layer [data-k="none"]');if(none)none.hidden=!!o.needsTime;
+  if(o.final)sheet.cbAt=null;
+  updTimeSum();
+}
+ACT.pickout=el=>{
+  syncOutcomeInputs();
+  sheet.outcome=el.dataset.k;
+  $$('#layer .opt').forEach(b=>b.classList.toggle('sel',b.dataset.k===sheet.outcome));
+  syncTimeBox();
+  if(OUTCOMES[sheet.outcome].needsTime&&!sheet.cbAt){const b=$('#timeBox');if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',behavior:'smooth'});}
+};
+ACT.saveout=()=>{
+  const s=sheet,c=get(s.id);
+  if(!c||!s.outcome)return;
+  syncOutcomeInputs();
+  const o=OUTCOMES[s.outcome],cb=o.final?null:s.cbAt;
+  if(o.needsTime&&!cb){toast('Pick a time for the callback first.');return;}
+  if(cb&&cb<Date.now()-MIN){toast('That time has passed. Pick a later time.');return;}
+  c.name=s.name.trim().slice(0,80);c.notes=s.notes.trim().slice(0,3000);c.cat=s.cat;c.tags=s.tags.slice();c.cbNote=cb?s.cbNote.trim().slice(0,120):'';
+  const last=c.calls[c.calls.length-1];
+  if(s.mode==='complete'&&last&&!last.outcome)last.outcome=s.outcome;
+  else if(s.mode==='fix'&&last)last.outcome=s.outcome;
+  else c.calls.push({at:Date.now(),outcome:s.outcome});
+  c.callbackAt=cb||null;c.notifiedAt=null;c.prevCb=null;
+  if(db.pending===c.id)db.pending=null;
+  save();closeSheet();render();
+  if(cb)toast('Reminder set for '+fmtDT(cb),{action:{label:'Add to calendar',fn:()=>addToCalendar(c.id)},ms:6500});
+  else toast('Saved');
+  checkDue();
+};
+ACT.notcalled=()=>{
+  const c=get(sheet.id);
+  if(!c)return;
+  const last=c.calls[c.calls.length-1];
+  if(last&&!last.outcome)c.calls.pop();
+  c.callbackAt=c.prevCb||null;c.prevCb=null;
+  c.notifiedAt=c.callbackAt&&c.callbackAt<=Date.now()?Date.now():null;
+  if(db.pending===c.id)db.pending=null;
+  save();closeSheet();render();toast('Removed. That call was not counted.');
+};
+
+/* ================= SNOOZE ================= */
+function openSnooze(id){
+  const c=get(id);if(!c)return;
+  openSheet({type:'snooze',id,cbAt:null});
+  $('#layer').innerHTML=wrapSheet(
+    '<div class="sheet-head"><div><h2>Remind me to call</h2><div class="ph">'+esc(dn(c))+'</div></div><span class="sp"></span><button class="btn quiet sm" data-act="close" aria-label="Close">'+IC.x+'</button></div>'+
+    '<div class="sheet-body mt">'+timeBoxHTML(false)+'</div>'+
+    '<div class="sheet-foot"><button class="btn pri" data-act="savesnooze">Set reminder</button></div>');
+}
+ACT.snooze=el=>openSnooze(el.dataset.id);
+ACT.savesnooze=()=>{
+  const c=get(sheet.id);
+  if(!c)return;
+  if(!sheet.cbAt){toast('Pick a time first.');return;}
+  if(sheet.cbAt<Date.now()-MIN){toast('That time has passed. Pick a later time.');return;}
+  const t=sheet.cbAt;
+  setCb(c,t);closeSheet();render();
+  toast('Reminder set for '+fmtDT(t),{action:{label:'Add to calendar',fn:()=>addToCalendar(c.id)},ms:6500});
+};
+
+/* ================= DETAIL SHEET ================= */
+function openDetail(id){if(!get(id))return;openSheet({type:'detail',id});renderDetail();}
+ACT.open=el=>openDetail(el.dataset.id);
+function renderDetail(){
+  const c=get(sheet.id);
+  if(!c){closeSheet();return;}
+  const st=statusOf(c),s=info(st),last=c.calls[c.calls.length-1],cb=c.callbackAt,now=Date.now();
+  const hist=c.calls.slice().reverse().map(k=>{
+    const o=info(k.outcome||'dialed');
+    return '<div class="hist"><span>'+fmtDT(k.at)+'</span><span class="chip t-'+o.tone+'">'+esc(k.outcome?o.label:'Reply not logged')+'</span></div>';
+  }).join('');
+  $('#layer').innerHTML=wrapSheet(
+    '<div class="sheet-head"><div><h2>'+esc(c.name||'Unnamed seller')+'</h2><div class="ph">+91 '+fmtPhone(c.phone)+'</div></div><span class="sp"></span><button class="btn quiet sm" data-act="close" aria-label="Close">'+IC.x+'</button></div>'+
+    '<div class="sheet-body"><div class="row mt"><button class="btn pri sp" data-act="call" data-id="'+c.id+'">'+IC.phone+'Call</button><button class="btn sp" data-act="wa" data-id="'+c.id+'">'+IC.chat+'WhatsApp</button></div>'+
+    '<div class="row wrap mt"><span class="chip t-'+s.tone+'">'+esc(s.label)+'</span>'+(last?'<span class="hint">Last call '+fmtDT(last.at)+'</span>':'')+'</div>'+
+    (cb?'<div class="alert '+(cb<=now?'bad':'warn')+'"><b>'+(cb<=now?'Callback due ':'Callback ')+fmtDT(cb)+'</b>'+(c.cbNote?'<div>Talk about: '+esc(c.cbNote)+'</div>':'')+
+        '<div class="chips mt"><button class="pick" data-act="qsnooze" data-k="10m">In 10 min</button><button class="pick" data-act="qsnooze" data-k="1h">In 1 hour</button><button class="pick" data-act="qsnooze" data-k="t10">Tomorrow 10 AM</button><button class="pick" data-act="snooze" data-id="'+c.id+'">Pick a time</button></div>'+
+        '<div class="row wrap mt"><button class="btn sm" data-act="cal" data-id="'+c.id+'">'+IC.cal+'Add to calendar</button><button class="btn sm" data-act="gcal" data-id="'+c.id+'">'+IC.cal+'Google Calendar</button><button class="btn sm" data-act="clearcb" data-id="'+c.id+'">Clear reminder</button></div></div>'
+       :'<div class="row mt"><button class="btn sm" data-act="snooze" data-id="'+c.id+'">'+IC.clock+'Set a reminder</button></div>')+
+    '<label for="d_name">Name</label><input id="d_name" type="text" maxlength="80" autocapitalize="words" value="'+esc(c.name)+'">'+
+    '<label for="d_cat">What do they make?</label><select id="d_cat">'+catOptions(c.cat)+'</select>'+
+    '<label>What do they need?</label>'+tagChips(c.tags,'dtag')+
+    '<label for="d_notes">Notes: what they said and what they need</label><textarea id="d_notes" maxlength="3000">'+esc(c.notes)+'</textarea>'+
+    '<div class="two"><div><label for="d_shop">Shop or products</label><input id="d_shop" type="text" maxlength="80" value="'+esc(c.shop)+'"></div><div><label for="d_city">City</label><input id="d_city" type="text" maxlength="60" value="'+esc(c.city)+'"></div></div>'+
+    '<div class="row wrap mt2"><button class="btn sm" data-act="log" data-id="'+c.id+'">Log a new reply</button>'+(last&&last.outcome?'<button class="btn sm" data-act="fix" data-id="'+c.id+'">Change last reply</button>':'')+'</div>'+
+    (hist?'<h2 class="sec">Call history</h2>'+hist:'')+
+    '<div class="row mt2"><button class="btn danger sm" data-act="del" data-id="'+c.id+'">Delete this number</button></div></div>'+
+    '<div class="sheet-foot"><button class="btn pri" data-act="savedetail">Save</button></div>');
+}
+function saveDetail(silent){
+  const c=sheet&&get(sheet.id),n=$('#d_name');
+  if(!c||!n)return;
+  c.name=n.value.trim().slice(0,80);c.shop=$('#d_shop').value.trim().slice(0,80);c.city=$('#d_city').value.trim().slice(0,60);c.notes=$('#d_notes').value.trim().slice(0,3000);
+  const k=$('#d_cat');if(k)c.cat=k.value;
+  save();
+  if(!silent)toast('Saved');
+  render();
+}
+ACT.savedetail=()=>{saveDetail(false);closeSheet();};
+ACT.qsnooze=el=>{
+  const c=get(sheet.id),p=presets().find(x=>x.k===el.dataset.k);
+  if(!c||!p)return;
+  saveDetail(true);setCb(c,p.ts);renderDetail();render();
+  toast('Reminder set for '+fmtDT(p.ts));
+};
+ACT.clearcb=el=>{
+  const c=get(el.dataset.id);
+  if(!c)return;
+  setCb(c,null);
+  if(sheet&&sheet.type==='detail'){saveDetail(true);renderDetail();}else render();
+};
+ACT.del=el=>{
+  const id=el.dataset.id,c=get(id);
+  if(!c)return;
+  dialog({level:'warn',title:'Delete this number?',msg:dn(c)+' and its notes and call history will be removed. This cannot be undone.',buttons:[
+    {label:'Cancel',primary:true},
+    {label:'Delete',danger:true,fn:()=>{
+      db.contacts=db.contacts.filter(x=>x.id!==id);
+      if(db.pending===id)db.pending=null;
+      if(sheet)sheet.id=null;
+      save();closeSheet();render();toast('Deleted');
+    }}]});
+};
+
+/* ================= REMINDERS ================= */
+let actx=null;
+function unlockAudio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){}}
+function beep(){
+  try{
+    unlockAudio();
+    const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+    o.type='sine';o.frequency.value=880;o.connect(g);g.connect(actx.destination);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.25,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+    o.start(t);o.stop(t+0.55);
+  }catch(e){}
+}
+document.addEventListener('click',unlockAudio,{once:true});
+function setBadge(n){
+  try{
+    if(!navigator.setAppBadge)return;
+    const p=n>0?navigator.setAppBadge(n):navigator.clearAppBadge();
+    if(p&&p.catch)p.catch(()=>{});
+  }catch(e){}
+}
+async function sysNotify(c){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  const title='Call back '+dn(c);
+  const body=[fmtPhone(c.phone),(c.cbNote||c.notes||'').replace(/\s+/g,' ').slice(0,90)].filter(Boolean).join('. ');
+  const opt={body,tag:'cb-'+c.id,renotify:true,requireInteraction:true,vibrate:[250,120,250],icon:'icon-192.png',badge:'icon-192.png',data:{id:c.id}};
+  try{
+    const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+    if(reg){await reg.showNotification(title,opt);return;}
+  }catch(e){}
+  try{new Notification(title,{body,tag:opt.tag});}catch(e){}
+}
+function checkDue(){
+  const now=Date.now();
+  const due=db.contacts.filter(c=>c.callbackAt&&c.callbackAt<=now);
+  const fresh=due.filter(c=>!c.notifiedAt);
+  if(fresh.length){
+    fresh.forEach(c=>{c.notifiedAt=now;});
+    save();
+    try{if(navigator.vibrate)navigator.vibrate([250,120,250]);}catch(e){}
+    beep();
+    if(document.visibilityState==='visible'){
+      if(fresh.length===1){const c=fresh[0];toast('Time to call back '+dn(c),{action:{label:'Open',fn:()=>openDetail(c.id)},ms:10000});}
+      else toast(fresh.length+' callbacks are due',{action:{label:'View',fn:()=>{view='today';render();window.scrollTo(0,0);}},ms:10000});
+    }else fresh.forEach(sysNotify);
+  }
+  if(fresh.length||due.length!==lastDue){lastDue=due.length;renderIfIdle();}
+}
+ACT.askalerts=async()=>{
+  if(!('Notification' in window)){toast('This browser cannot show alerts.');return;}
+  try{
+    const r=await Notification.requestPermission();
+    toast(r==='granted'?'Alerts are on.':'Alerts are blocked. Allow notifications for this site in your browser settings.',{ms:4000});
+  }catch(e){toast('Could not turn on alerts.');}
+  render();
+};
+ACT.testalert=()=>{
+  if(!('Notification' in window)){toast('This browser cannot show alerts.');return;}
+  if(Notification.permission!=='granted'){toast('Turn on alerts first.');return;}
+  sysNotify({id:'test',name:'Test seller',phone:'9876543210',notes:'This is how a callback alert looks.'});
+  toast('Test alert sent.');
+};
+
+/* ================= FILES: calendar, backup, CSV ================= */
+function saveFile(name,text,type){
+  try{
+    if(navigator.standalone&&navigator.canShare&&window.File){
+      const f=new File([text],name,{type});
+      if(navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(()=>{});return;}
+    }
+  }catch(e){}
+  const url=URL.createObjectURL(new Blob([text],{type}));
+  const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),20000);
+}
+const ymd=()=>toLocalInput(Date.now()).slice(0,10);
+function addToCalendar(id){
+  const c=get(id);
+  if(!c||!c.callbackAt)return;
+  saveFile('creavy-call-'+c.phone+'.ics',buildICS([c]),'text/calendar');
+  toast('Open the downloaded file to put the alarm in your calendar.',{ms:5000});
+}
+ACT.cal=el=>addToCalendar(el.dataset.id);
+ACT.gcal=el=>{const c=get(el.dataset.id);if(c&&c.callbackAt)openLink(gcalURL(c));};
+ACT.icsall=()=>{
+  const l=db.contacts.filter(c=>c.callbackAt&&c.callbackAt>Date.now());
+  if(!l.length){toast('No upcoming callbacks to download.');return;}
+  saveFile('creavy-callbacks.ics',buildICS(l),'text/calendar');
+  toast('Open the downloaded file to add all alarms to your calendar.',{ms:5000});
+};
+ACT.exportjson=()=>{
+  db.lastBackup=Date.now();save();
+  saveFile('creavy-calls-backup-'+ymd()+'.json',JSON.stringify(db,null,1),'application/json');
+  render();toast('Backup downloaded.');
+};
+ACT.exportcsv=()=>{
+  if(!db.contacts.length){toast('There are no numbers to export.');return;}
+  saveFile('creavy-numbers-'+ymd()+'.csv','\uFEFF'+toCSV(db.contacts),'text/csv');
+};
+ACT.importjson=()=>$('#file').click();
+$('#file').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];
+  e.target.value='';
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>handleBackupText(String(r.result));
+  r.readAsText(f);
+});
+function handleBackupText(text){
+  try{
+    const d=JSON.parse(text);
+    if(Array.isArray(d)){importOldCRM(d);return;}               // backup from the older Creavy seller CRM
+    if(!d||!Array.isArray(d.contacts))throw new Error('bad');
+    // Reply options saved in the backup. They are switched on only while the file is read, so the replies
+    // logged with them are not lost; they are kept for good only if you press Merge or Replace.
+    const merged=db.settings.custom.slice(),have0=new Set(merged.map(o=>o.k));
+    cleanCustom(d.settings&&d.settings.custom).forEach(o=>{if(!have0.has(o.k)&&merged.length<8){merged.push(o);have0.add(o.k);}});
+    setCustom(merged);
+    const list=d.contacts.map(normContact).filter(Boolean);
+    setCustom(db.settings.custom);
+    const keepReplies=()=>{db.settings.custom=merged;setCustom(merged);};
+    if(!list.length)throw new Error('empty');
+    dialog({title:'Restore backup',msg:'The backup has '+list.length+' numbers. You have '+db.contacts.length+' now.\n\nMerge adds only numbers you do not have yet. Replace deletes what is here first.',buttons:[
+      {label:'Cancel'},
+      {label:'Merge',primary:true,fn:()=>{
+        keepReplies();
+        const have=new Set(db.contacts.map(c=>c.phone));let n=0;
+        list.forEach(c=>{if(!have.has(c.phone)){have.add(c.phone);db.contacts.push(c);n++;}});
+        save();render();toast('Added '+n+' numbers.');
+      }},
+      {label:'Replace',danger:true,fn:()=>{
+        keepReplies();
+        const seen=new Set(),st=d.settings&&typeof d.settings==='object'?d.settings:{};
+        db.contacts=list.filter(c=>!seen.has(c.phone)&&seen.add(c.phone));
+        if(typeof st.wa==='string')db.settings.wa=st.wa;
+        db.settings.cats=cleanList(st.cats,db.settings.cats);
+        db.settings.tags=cleanList(st.tags,db.settings.tags);
+        db.pending=null;save();render();toast('Backup restored.');
+      }}]});
+  }catch(err){toast('That file is not a Creavy backup.');}
+}
+/* The older Creavy seller CRM saves a plain list of sellers. Each becomes one number here, with its last reply. */
+const OLD_STATUS={'Callback Requested':'callback','Interested':'interested','Docs Pending':'docs','No Answer':'noanswer','Onboarded':'joined','Do Not Call':'notint'};
+const OLD_TAGS={'Needs Product Photo Help':DEFAULT_TAGS[0],'Needs Catalog / Price Upload':DEFAULT_TAGS[1],'No GST (Needs Enrolment ID)':DEFAULT_TAGS[2],'Has GSTIN Ready':DEFAULT_TAGS[3],'Check iThink Pincode Pickup':DEFAULT_TAGS[4],'Fragile Packaging Guidance':DEFAULT_TAGS[5],'Custom / Made-to-Order Items':DEFAULT_TAGS[6],'Wants WhatsApp Onboarding':DEFAULT_TAGS[7]};
+const OLD_CATS={'Kantha Stitch & Embroidery':'Kantha & embroidery','Terracotta & Clay Craft':'Terracotta & clay craft','Handloom & Tant Sarees':"Women's wear & sarees",'Brass, Bell Metal & Dokra':'Brass, bell metal & Dokra','Wood, Bamboo & Cane':'Wood, bamboo & cane','Santiniketan Leather Goods':'Leather goods','Candles & Handcrafted Diyas':'Candles & diyas','Handmade Jewelry':'Jewelry & accessories','Personalized & Custom Gifts':'Personalized gifts','Other Artisan Product':'Other'};
+function convertOld(arr){
+  const list=[],bad=[],now=Date.now();
+  const ts=v=>{const n=typeof v==='number'?v:Date.parse(v);return isFinite(n)&&n>0?n:null;};
+  arr.forEach(s=>{
+    if(!s||typeof s!=='object')return;
+    const phone=normPhone(s.phone);
+    if(!phone){bad.push(String(s.name||s.phone||'?').slice(0,40));return;}
+    const lastAt=ts(s.lastCalledAt)||ts(s.createdAt)||now;
+    const oc=Object.prototype.hasOwnProperty.call(OLD_STATUS,s.status)?OLD_STATUS[s.status]:null;
+    const cbAt=ts(s.reminderAt);
+    const cb=(oc==='callback'||(cbAt&&s.reminderDone===false))&&oc!=='notint'?cbAt:null;
+    const hist=Array.isArray(s.history)?s.history:[];
+    const earlier=hist.slice(0,-1).map(h=>{const t=h&&h.note?String(h.note).replace(/^\[[^\]]*\]\s*/,'').trim():'';return t?fmtDay(ts(h.at)||lastAt)+': '+t:'';}).filter(Boolean);
+    const notes=String(s.notes||'')+(earlier.length?(s.notes?'\n\n':'')+'Earlier notes:\n'+earlier.join('\n'):'');
+    list.push(normContact({phone,name:s.name,city:s.location,cat:OLD_CATS[s.category]||s.category,
+      tags:Array.isArray(s.reqTags)?s.reqTags.map(t=>OLD_TAGS[t]||t):[],notes,addedAt:ts(s.createdAt)||lastAt,
+      calls:[{at:lastAt,outcome:oc}],callbackAt:cb,cbNote:s.reminderNote,notifiedAt:cb&&cb<=now?now:null}));
+  });
+  return{list:list.filter(Boolean),bad};
+}
+function importOldCRM(arr){
+  const r=convertOld(arr);
+  if(!r.list.length)throw new Error('empty');
+  const have=new Set(db.contacts.map(c=>c.phone));
+  const fresh=r.list.filter(c=>!have.has(c.phone)),skipped=r.list.length-fresh.length;
+  const extra=(skipped?'\n'+skipped+' already in your list, skipped.':'')+(r.bad.length?'\n'+r.bad.length+' without a valid mobile number, skipped.':'');
+  if(!fresh.length){dialog({title:'Nothing new to add',msg:'Every seller in this file is already in your list.'+extra,buttons:[{label:'OK',primary:true}]});return;}
+  dialog({title:'Older Creavy seller CRM',msg:'Found '+fresh.length+' sellers to add.'+extra+'\n\nEach one keeps its last reply, callback time, category, needs and notes.',buttons:[
+    {label:'Cancel'},
+    {label:'Add '+fresh.length,primary:true,fn:()=>{fresh.forEach(c=>db.contacts.push(c));save();render();toast('Added '+fresh.length+' sellers.');}}]});
+}
+ACT.wipe=()=>dialog({level:'block',title:'Delete all data?',msg:'All numbers, notes and call history on this phone will be removed. This cannot be undone.',buttons:[
+  {label:'Cancel',primary:true},
+  {label:'Delete everything',danger:true,fn:()=>{db=blank();setCustom([]);save();render();toast('All data deleted.');}}]});
+/* Settings actions: your own replies, your lists, sample sellers */
+ACT.addcustom=()=>{
+  const el=$('#s_custom'),label=(el.value||'').replace(/\s+/g,' ').trim().slice(0,40);
+  if(!label){toast('Type the reply first.');el.focus();return;}
+  const low=label.toLowerCase();
+  if(BUILTIN_LABELS.includes(low)||db.settings.custom.some(o=>o.label.toLowerCase()===low)){toast('You already have that reply.');return;}
+  if(db.settings.custom.length>=8){toast('You can add up to 8 replies. Remove one you do not use.');return;}
+  db.settings.custom.push({k:'x'+Date.now().toString(36).slice(-4)+Math.random().toString(36).slice(2,5),label});
+  setCustom(db.settings.custom);save();render();toast('Added. It now shows when you log a reply.');
+};
+ACT.delcustom=el=>{
+  const k=el.dataset.k;
+  if(db.contacts.some(c=>c.calls.some(x=>x.outcome===k))){toast('That reply is in use, so it cannot be removed.');return;}
+  db.settings.custom=db.settings.custom.filter(o=>o.k!==k);
+  setCustom(db.settings.custom);save();render();
+};
+ACT.savelists=()=>{
+  const lines=id=>$(id).value.split(/\r?\n/);
+  db.settings.cats=cleanList(lines('#s_cats'),[]);
+  db.settings.tags=cleanList(lines('#s_tags'),[]);
+  save();render();toast('Lists saved.');
+};
+ACT.resetlists=()=>{db.settings.cats=DEFAULT_CATS.slice();db.settings.tags=DEFAULT_TAGS.slice();save();render();toast('The standard lists are back.');};
+ACT.addsamples=()=>{
+  const now=Date.now(),made=[];
+  const mk=(phone,f,extra)=>{if(byPhone(phone))return;const c=makeContact(phone,f);c.sample=true;Object.assign(c,extra||{});made.push(c);};
+  mk('9000000001',{name:'Rupa Das (sample)',cat:"Women's wear & sarees",notes:'Makes Kantha sarees and dupattas at home. Has photos on her phone.'},{tags:[DEFAULT_TAGS[0]]});
+  mk('9000000002',{name:'Anwar Sheikh (sample)',cat:'Terracotta & clay craft',notes:'Spoke yesterday. He is at the market until Sunday.'},{tags:[DEFAULT_TAGS[5]],calls:[{at:now-26*HOUR,outcome:'callback'}],callbackAt:now+20*HOUR,cbNote:'Explain how fragile items are packed'});
+  mk('9000000003',{name:'Meena Pal (sample)',cat:'Bags & clutches',notes:'Not interested right now.'},{calls:[{at:now-3*DAY,outcome:'notint'}]});
+  if(!made.length){toast('The sample sellers are already in your list.');return;}
+  made.forEach(c=>db.contacts.push(c));
+  save();render();toast('Sample sellers added. Try calling Meena to see the warning.',{ms:5000});
+};
+ACT.rmsamples=()=>{
+  db.contacts=db.contacts.filter(c=>!c.sample);
+  if(db.pending&&!get(db.pending))db.pending=null;
+  save();render();toast('Sample sellers removed.');
+};
+ACT.install=async()=>{
+  if(!deferredInstall)return;
+  deferredInstall.prompt();
+  try{await deferredInstall.userChoice;}catch(e){}
+  deferredInstall=null;render();
+};
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;if(!sheet&&!dlgOpen)render();});
+window.addEventListener('appinstalled',()=>{deferredInstall=null;toast('Installed.');render();});
+
+/* ================= EVENTS ================= */
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.classList&&t.classList.contains('backdrop')){if(t.closest('#dlgRoot'))closeDlg();else closeSheet();return;}
+  const el=t.closest?t.closest('[data-act]'):null;
+  if(!el)return;
+  const fn=ACT[el.dataset.act];
+  if(fn)fn(el,e);
+});
+document.addEventListener('input',e=>{
+  const t=e.target,id=t.id;
+  if(id==='a_phone')checkPhone();
+  else if(id==='q'){if(view==='queue'){F.q=t.value;F.ql=100;}else{F.cq=t.value;F.cl=100;}renderList();}
+  else if(id==='o_time'&&sheet){const ts=t.value?new Date(t.value).getTime():NaN;sheet.cbAt=isFinite(ts)?ts:null;markPicks('');updTimeSum();}
+  else if(id==='s_wa'){db.settings.wa=t.value;save();}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){if(dlgOpen)closeDlg();else if(sheet)closeSheet();}
+  else if(e.key==='Enter'&&e.target&&e.target.id==='a_phone'){e.preventDefault();saveOne(false);}
+});
+// Back in the app after a call: ask what happened.
+function promptPending(){
+  const id=db.pending;
+  if(id&&!db.pendingShown&&get(id)&&!sheet&&!dlgOpen){db.pendingShown=true;save();openOutcome(id,'new');}
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)return;
+  checkDue();
+  promptPending();
+});
+window.addEventListener('pageshow',e=>{if(e.persisted){checkDue();promptPending();}});
+
+/* ================= START ================= */
+function init(){
+  if(history.state&&history.state.sheet){try{history.replaceState(null,'');}catch(e){}}
+  const NAVIC={today:IC.clock,queue:IC.list,called:IC.done,settings:IC.sliders};
+  $$('nav button').forEach(b=>{$('.ico',b).innerHTML=NAVIC[b.dataset.tab];});
+  $('#fab').innerHTML=IC.plus+'Add numbers';
+  render();
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='open-cb'&&get(e.data.id))openDetail(e.data.id);});
+  }
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+  const p=new URLSearchParams(location.search);
+  if(p.has('cb')||p.has('add')||p.has('tab')){try{history.replaceState(null,'',location.pathname);}catch(e){}}
+  checkDue();
+  if(p.get('cb')&&get(p.get('cb')))openDetail(p.get('cb'));
+  else if(p.has('add'))openAdd('one');
+  else if(p.get('tab')==='queue'){view='queue';render();}
+  else promptPending();
+  setInterval(checkDue,15000);
+}
+init();
+</script>
+</body>
+</html>
